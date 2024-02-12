@@ -1,63 +1,64 @@
 import os
 os.system('cls' if os.name == 'nt' else 'clear')
-import time
-import random
 from queue import Queue
 
-class Pasajero:
-    def __init__(self, nombre, vip=False):
-        self.nombre = nombre
-        self.vip = vip
+def boarding_process():
+    boarding_queue = Queue()
 
-def proceso_check_in(cola_no_vip):
-    print("Realizando proceso de check-in...")
-    while not cola_no_vip.empty():
-        pasajero = cola_no_vip.get()
-        print(f"Check-in completado para {pasajero.nombre}")
-        time.sleep(random.uniform(0.5, 1))  # Simulación de tiempo de check-in
+    while True:
+        try:
+            passenger_type = int(input("¿Es VIP o turista? (Ingrese 1 para VIP, 2 para turista): "))
+            if passenger_type not in [1, 2]:
+                raise ValueError("Por favor, ingrese 1 o 2.")
+        except ValueError as e:
+            print(e)
+            continue
 
-def proceso_inspeccion(cola_no_vip):
-    print("\nRealizando proceso de inspección...")
-    while not cola_no_vip.empty():
-        pasajero = cola_no_vip.get()
-        print(f"Inspección completada para {pasajero.nombre}")
-        time.sleep(random.uniform(0.5, 1))  # Simulación de tiempo de inspección
+        if passenger_type == 1:
+            all_passengers = int(input("¿Son todos los pasajeros VIP? (Ingrese 1 para sí, 2 para no): "))
+            if all_passengers == 1:
+                boarding_queue.put("VIP")
+            elif all_passengers == 2:
+                num_passengers = 0
+                while True:
+                    try:
+                        num_passengers = int(input("Ingrese la cantidad de pasajeros VIP: "))
+                        break
+                    except ValueError:
+                        print("Por favor, ingrese un número válido.")
+                        continue
+                for _ in range(num_passengers):
+                    boarding_queue.put("VIP")
+            else:
+                print("Opción no válida. Por favor, ingrese 1 o 2.")
+        elif passenger_type == 2:
+            check_in = int(input("¿Vas a hacer check-in? (Ingrese 1 para sí, 2 para no): "))
+            if check_in == 1:
+                print("Realizando check-in...")
+            elif check_in == 2:
+                print("Sin check-in.")
+            else:
+                print("Opción no válida. Por favor, ingrese 1 o 2.")
 
-def proceso_embarque(cola_vip, cola_no_vip):
-    print("\nIniciando proceso de embarque...")
-    print("\nEmbarcando pasajeros VIP:")
-    while not cola_vip.empty():
-        pasajero = cola_vip.get()
-        print(f"Embarcando pasajero VIP: {pasajero.nombre}")
-        time.sleep(random.uniform(0.5, 1))  # Simulación de tiempo de embarque
+            num_passengers = 0
+            while True:
+                try:
+                    num_passengers = int(input("Ingrese la cantidad de pasajeros turistas: "))
+                    break
+                except ValueError:
+                    print("Por favor, ingrese un número válido.")
+                    continue
 
-    print("\nEmbarcando pasajeros no VIP:")
-    while not cola_no_vip.empty():
-        pasajero = cola_no_vip.get()
-        print(f"Embarcando pasajero no VIP: {pasajero.nombre}")
-        time.sleep(random.uniform(0.5, 1))  # Simulación de tiempo de embarque
+            for _ in range(num_passengers):
+                boarding_queue.put("Turista")
 
-# Ejemplo de uso
-cola_pasajeros = Queue()
+        another_passenger = int(input("¿Desea agregar otro pasajero? (Ingrese 1 para sí, 2 para no): "))
+        if another_passenger != 1:
+            break
 
-# Crear pasajeros y añadirlos a la cola
-for i in range(1, 50):
-    vip = True if i % 5 == 0 else False  # Cada 5to pasajero es VIP
-    cola_pasajeros.put(Pasajero(f"Pasajero {i}", vip))
+    print("\nLista de pasajeros en la cola de embarque:")
+    while not boarding_queue.empty():
+        print(boarding_queue.get())
 
-# Separar pasajeros VIP de los no VIP
-cola_vip = Queue()
-cola_no_vip = Queue()
-
-while not cola_pasajeros.empty():
-    pasajero = cola_pasajeros.get()
-    if pasajero.vip:
-        cola_vip.put(pasajero)
-    else:
-        cola_no_vip.put(pasajero)
-
-# Procesos
-proceso_check_in(cola_no_vip)
-proceso_inspeccion(cola_no_vip)
-proceso_inspeccion(cola_vip)
-proceso_embarque(cola_vip, cola_no_vip)
+if __name__ == "__main__":
+    boarding_process()
